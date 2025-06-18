@@ -1,0 +1,37 @@
+using System;
+
+namespace NumberMultiplier
+{
+    class Program
+    {
+        static double GetNumber(string prompt)
+        {
+            double number;
+            Console.Write(prompt);
+
+            while (!double.TryParse(Console.ReadLine().Replace('.', ','), out number))
+            {
+                Console.WriteLine("Ошибка! Введите корректное число.");
+                Console.Write("Повторите ввод: ");
+            }
+
+            return number;
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("ПРОГРАММА УМНОЖЕНИЯ ЧИСЕЛ");
+            Console.WriteLine("--------------------------");
+
+            double number1 = GetNumber("Введите первое число: ");
+            double number2 = GetNumber("Введите второе число: ");
+
+            double result = number1 * number2;
+
+            Console.WriteLine($"\nРезультат умножения: {number1} × {number2} = {result}");
+
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+    }
+}
