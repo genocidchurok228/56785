@@ -1,0 +1,111 @@
+using System;
+
+class DynamicArray
+{
+    private int[] _array;
+    private int _count;
+
+    public DynamicArray(int initialCapacity = 2)
+    {
+        _array = new int[initialCapacity];
+        _count = 0;
+    }
+
+    public int Count => _count;
+
+    public void Add(int value)
+    {
+        if (_count == _array.Length)
+        {
+            Resize(_array.Length * 2);
+        }
+        _array[_count++] = value;
+    }
+
+    public int Get(int index)
+    {
+        if (index < 0 || index >= _count)
+            throw new IndexOutOfRangeException("Индекс вне допустимого диапазона!");
+        return _array[index];
+    }
+
+    public void RemoveAt(int index)
+    {
+        if (index < 0 || index >= _count)
+            throw new IndexOutOfRangeException("Индекс вне допустимого диапазона!");
+
+        for (int i = index; i < _count - 1; i++)
+        {
+            _array[i] = _array[i + 1];
+        }
+        _count--;
+
+        if (_count < _array.Length / 2)
+        {
+            Resize(_array.Length / 2);
+        }
+    }
+
+    private void Resize(int newSize)
+    {
+        int[] newArray = new int[newSize];
+        Array.Copy(_array, newArray, _count);
+        _array = newArray;
+    }
+
+    public int this[int index]
+    {
+        get => Get(index);
+        set
+        {
+            if (index < 0 || index >= _count)
+                throw new IndexOutOfRangeException("Индекс вне допустимого диапазона!");
+            _array[index] = value;
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        DynamicArray array = new DynamicArray();
+        bool isRunning = true;
+
+        Console.WriteLine("Вводите числа (для завершения введите 'exit'):");
+
+        while (isRunning)
+        {
+            string input = Console.ReadLine();
+
+            if (input.ToLower() == "exit")
+            {
+                isRunning = false;
+            }
+            else if (int.TryParse(input, out int number))
+            {
+                array.Add(number);
+                Console.WriteLine($"Добавлено: {number}, Текущий размер: {array.Count}");
+            }
+            else
+            {
+                Console.WriteLine("Ошибка: введите число или 'exit'!");
+            }
+        }
+
+        Console.WriteLine("\nСодержимое массива:");
+        for (int i = 0; i < array.Count; i++)
+        {
+            Console.WriteLine($"array[{i}] = {array[i]}");
+        }
+    }
+}           
+
+
+
+
+
+
+
+
+
