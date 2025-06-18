@@ -1,0 +1,309 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace boycovskayanaxuybitva
+{ 
+class Program
+{
+    public static void Main()
+    {
+        new Arena().StartGame();
+    }
+}
+
+abstract class Character
+{
+    public string Name { get; private set; }
+    public int Health { get; protected set; }
+    public int MaxHealth { get; private set; }
+    public int Attack { get; private set; }
+    public bool IsAlive => Health > 0;
+
+    public Character(string name, int maxHealth, int attack)
+    {
+        Name = name;
+        MaxHealth = maxHealth;
+        Health = maxHealth;
+        Attack = attack;
+    }
+
+    public void ApplyDamage(int damage)
+    {
+        Health = Math.Max(Health - damage, 0);
+        Console.WriteLine($"{Name} получил {damage} урона! Осталось здоровья: {Health}");
+    }
+
+    public virtual void RestoreHealth()
+    {
+        Health = MaxHealth;
+        Console.WriteLine($"{Name} восстанавливает здоровье до {Health}.");
+    }
+
+    public abstract void DealDamage(Character opponent);
+
+    public virtual void GetDeathPhrase()
+    {
+        Console.WriteLine($"{Name} пал в бою!");
+    }
+}
+
+class Marrior : Character
+{
+    public Marrior() : base("Иван Золо", 100, 15) { } 
+
+    public override void DealDamage(Character opponent)
+    {
+        Console.WriteLine($"{Name} наносит мощный удар мечом!");
+        opponent.ApplyDamage(Attack);
+    }
+}
+
+class Mag : Character
+{
+    private int mana;
+    private const int MaxMana = 100;
+    private const int MeteorDamage = 20;
+
+    public Mag() : base("УКУРОК", 100, 8) 
+    {
+        mana = MaxMana;
+    }
+
+    public void MeteorAttack(Character opponent)
+    {
+        if (mana >= 30)
+        {
+            opponent.ApplyDamage(MeteorDamage);
+            mana -= 30;
+            Console.WriteLine($"{Name} использует 'ОКУРОК', нанося {MeteorDamage} урона! (30 маны потрачено)");
+        }
+        else
+        {
+            Console.WriteLine($"{Name} недостаточно маны для использования 'ОКУРОК'.");
+        }
+    }
+
+    public override void DealDamage(Character opponent)
+    {
+        if (mana >= 30)
+        {
+            MeteorAttack(opponent);
+        }
+        else
+        {
+            Console.WriteLine($"{Name} атакует окурками!");
+            opponent.ApplyDamage(Attack);
+        }
+    }
+}
+
+class Barbarian : Character
+{
+    public Barbarian() : base("злая бабка в маршрутке", 100, 12) { } 
+
+    public override void DealDamage(Character opponent)
+    {
+        int damage = Attack;
+        if (Health <= 50)
+        {
+            damage *= 2; 
+            Console.WriteLine($"{Name} активирует свою ярость и наносит в два раза больше урона!");
+        }
+
+        Console.WriteLine($"{Name} наносит удар!");
+        opponent.ApplyDamage(damage);
+    }
+}
+
+class Plut : Character
+{
+    public Plut() : base("сигма", 100, 18) { } 
+
+    public override void DealDamage(Character opponent)
+    {
+        Console.WriteLine($"{Name} выдает базу!");
+        opponent.ApplyDamage(Attack);
+    }
+}
+
+class Paladin : Character
+{
+    private bool canHeal;
+
+    public Paladin() : base("босс качалки", 120, 16) 
+    {
+        canHeal = true;
+    }
+
+    public override void DealDamage(Character opponent)
+    {
+        if (canHeal && Health <= 80)
+        {
+            RestoreHealth();
+            canHeal = false;
+            return; 
+        }
+
+        Console.WriteLine($"{Name} наносит удар с гантели!");
+        opponent.ApplyDamage(Attack);
+    }
+
+    public override void GetDeathPhrase()
+    {
+        Console.WriteLine($"{Name} пал в бою, не пожал вес.");
+    }
+}
+
+class Arena
+{
+    private Character[] characters;
+
+    public Arena()
+    {
+        characters = new Character[]
+        {
+           new Marrior(),
+           new Mag(),
+            new Barbarian(),
+           new Plut(),
+           new Paladin()
+        };
+    }
+
+    public void StartGame()
+    {
+        bool running = true;
+
+        while (running)
+        {
+            Console.Clear();
+            PrintCharacterList();
+            Console.WriteLine("\nВыберите персонажа (введите номер) для битвы или введите 'exit' для выхода:");
+            string input = Console.ReadLine();
+
+            if (input.ToLower() == "exit")
+            {
+                running = false;
+                continue; 
+            }
+
+            if (int.TryParse(input, out int playerChoice) && playerChoice > 0 && playerChoice <= characters.Len
+            {
+                Character playerCharacter = characters[playerChoice - 1];
+
+                if (!IsCharacterAlive(playerCharacter))
+                    continue;
+
+                Console.WriteLine("Против кого он будет сражаться? (введите номер):");
+                PrintOpponentList(playerChoice);
+                input = Console.ReadLine();
+
+                if (int.TryParse(input, out int opponentChoice) && opponentChoice > 0 && opponentChoice <= char
+                {
+                    Character opponentCharacter = characters[opponentChoice - 1];
+
+                    if (!IsCharacterAlive(opponentCharacter))
+                        continue;
+
+                    Fight(playerCharacter, opponentCharacter);
+
+                    if (!playerCharacter.IsAlive)
+                    {
+                        Console.WriteLine($"{playerCharacter.Name} теперь мертв.");
+                    }
+                    else
+                    {
+                        RestoreHealth(playerCharacter); 
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Неверный ввод. Пожалуйста, выберите противника заново или введите 'exit'
+                    Console.ReadKey();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Неверный ввод. Пожалуйста, выберите персонажа заново или введите 'exit'.");
+                Console.ReadKey();
+            }
+        }
+    }
+
+    private bool IsCharacterAlive(Character character)
+    {
+        if (!character.IsAlive)
+        {
+            Console.WriteLine($"{character.Name} мертв. Выберите другого персонажа.");
+            Console.ReadKey();
+            return false;
+        }
+        return true;
+    }
+
+    private void PrintCharacterList()
+    {
+        Console.WriteLine("Список персонажей:");
+        for (int i = 0; i < characters.Length; i++)
+        {
+            string status = characters[i].IsAlive ? "(живой)" : "(мертв)";
+            Console.WriteLine($"{i + 1}. {characters[i].Name} {status}");
+        }
+    }
+
+    private void PrintOpponentList(int playerChoice)
+    {
+        for (int i = 0; i < characters.Length; i++)
+        {
+            if (i != playerChoice - 1 && characters[i].IsAlive)
+            {
+                Console.WriteLine($"{i + 1}. {characters[i].Name}");
+            }
+        }
+    }
+
+    private void Fight(Character player, Character opponent)
+    {
+        Console.WriteLine($"Начинается бой между {player.Name} и {opponent.Name}!");
+
+        while (player.IsAlive && opponent.IsAlive)
+        {
+            player.DealDamage(opponent);
+
+            if (opponent.IsAlive) 
+            {
+                opponent.DealDamage(player);
+            }
+
+            PrintHealthStatus(player, opponent);
+        }
+
+        if (!player.IsAlive)
+        {
+            player.GetDeathPhrase();
+            opponent.GetDeathPhrase(); 
+        }
+        else
+        {
+            opponent.GetDeathPhrase();
+        }
+    }
+
+    private void PrintHealthStatus(Character player, Character opponent)
+    {
+        Console.WriteLine($"\n{player.Name}: Здоровье: {player.Health}/{player.MaxHealth}");
+        Console.WriteLine($"{opponent.Name}: Здоровье: {opponent.Health}/{opponent.MaxHealth}\n");
+        Thread.Sleep(2000); 
+    }
+
+    
+    private void RestoreHealth(Character character)
+    {
+        character.RestoreHealth();
+    }
+}
+}
