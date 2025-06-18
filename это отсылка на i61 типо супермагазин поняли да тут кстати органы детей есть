@@ -1,0 +1,128 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Supermarket
+{
+    class Product
+    {
+        public string Name { get; private set; }
+        public decimal Price { get; private set; }
+
+        public Product(string name, decimal price)
+        {
+            Name = name;
+            Price = price;
+        }
+    }
+
+    class Customer
+    {
+        public string Name { get; private set; }
+        public decimal Money { get; private set; }
+
+        public List<Product> PurchasedProducts { get; private set; } = new List<Product>();
+
+        public Customer(string name, decimal money)
+        {
+            Name = name;
+            Money = money;
+        }
+
+        public bool TryPurchase(List<Product> products)
+        {
+            Random random = new Random();
+            int productCount = random.Next(1, 5);
+            decimal totalCost = 0;
+
+            List<Product> selectedProducts = new List<Product>();
+
+            for (int i = 0; i < productCount; i++)
+            {
+                int productIndex = random.Next(products.Count);
+                Product product = products[productIndex];
+                selectedProducts.Add(product);
+                totalCost += product.Price;
+            }
+
+            if (totalCost <= Money)
+            {
+                PurchasedProducts.AddRange(selectedProducts);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    class Supermarket
+    {
+        private List<Product> products = new List<Product>
+        {
+            new Product("Мармелад", 200),
+            new Product("Молоко", 98),
+            new Product("Яйца", 152),
+            new Product("Сыр", 700),
+            new Product("Мясо", 400),
+            new Product("лимонад", 132),
+            new Product("чипсяки",250 ),
+            new Product("пивко", 120),
+            new Product("творог", 69),
+            new Product("органы детей", 500)
+        };
+
+        private Queue<Customer> queue = new Queue<Customer>();
+        private Random random = new Random();
+
+        public void Start()
+        {
+            int customerCount = random.Next(2, 21);
+
+            for (int i = 1; i <= customerCount; i++)
+            {
+                decimal money = random.Next(1, 1501);
+                queue.Enqueue(new Customer($"Покупатель {i}", money));
+            }
+
+            Console.WriteLine("Очередь покупателей:");
+
+            while (queue.Count > 0)
+            {
+                Customer customer = queue.Dequeue();
+                Console.WriteLine($"{customer.Name} с деньгами: {customer.Money} руб.");
+
+                Console.WriteLine("Нажмите Enter для проверки покупки...");
+                Console.ReadLine();
+
+                if (customer.TryPurchase(products))
+                {
+                    Console.WriteLine($"{customer.Name} купил следующие продукты:");
+                    foreach (var product in customer.PurchasedProducts)
+                    {
+                        Console.WriteLine($"- {product.Name} за {product.Price} руб.");
+                    }
+                    decimal totalSpent = customer.PurchasedProducts.Sum(p => p.Price);
+                    Console.WriteLine($"Общая стоимость: {totalSpent} руб.");
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine($"{customer.Name} не смог купить продукты.\n");
+                }
+            }
+
+            Console.WriteLine("Все покупатели обслужены.");
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Supermarket supermarket = new Supermarket();
+            supermarket.Start();
+        }
+    }
+}
