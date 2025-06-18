@@ -1,0 +1,43 @@
+
+using System;
+
+namespace SimpleProbability
+{
+    class Program
+    {
+        static double GetProbability()
+        {
+            Console.Write("Введите вероятность события (от 0 до 1, например 0,4): ");
+            string input = Console.ReadLine().Replace('.', ',');
+            double probability;
+
+            while (!double.TryParse(input, out probability)  ||probability < 0||  probability > 1)
+            {
+                Console.Write("ВВЕДИТЕ ЧИСЛО от 0 до 1 я не прошу не возможного (например: 0,5): ");
+                input = Console.ReadLine().Replace('.', ',');
+            }
+
+            return probability;
+        }
+
+        static void Main()
+        {
+            Console.WriteLine("Проверка срабатывания события");
+            Console.WriteLine("-----------------------------");
+
+            double probability = GetProbability();
+            Random random = new Random();
+            bool isHappened = random.NextDouble() <= probability;
+
+            Console.WriteLine("\nРезультат:");
+            Console.WriteLine(isHappened
+                ? $"Событие с вероятностью {probability:P0} СРАБОТАЛО!"
+                : $"Событие с вероятностью {probability:P0} НЕ сработало");
+
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+    }
+}
+
+
