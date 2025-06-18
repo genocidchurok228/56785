@@ -1,0 +1,190 @@
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.Linq;
+
+namespace StudentManagementSystem
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Management management = new Management();
+            management.Start();
+        }
+    }
+
+    public class Student
+    {
+        public string FirstName { get; private set; }
+        public string LastName { get; private set; }
+        public int Age { get; private set; }
+        public string Email { get; private set; }
+        public string PhoneNumber { get; private set; }
+
+        public Student(string firstName, string lastName, int age, string email, string phoneNumber)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Age = age;
+            Email = email;
+            PhoneNumber = phoneNumber;
+        }
+    }
+
+    public class Management
+    {
+
+        private const string CommandAddStudent = "1";
+        private const string CommandRemoveStudent = "2";
+        private const string CommandListStudent = "3";
+        private const string CommandSearchStudent = "4";
+        private const string CommandExit = "5";
+
+        private List<Student> _students;
+
+        public Management()
+        {
+            _students = new List<Student>();
+        }
+
+        public void Start()
+        {
+            bool isStart = true;
+            string userCommand;
+
+            while (isStart)
+            {
+                Console.Clear();
+                Console.WriteLine("Menu:");
+                Console.WriteLine($" для добавление студента нажмите {CommandAddStudent}");
+                Console.WriteLine($" для удаление студента нажмите {CommandRemoveStudent}");
+                Console.WriteLine($" чтобы вывести список студентов нажмите {CommandListStudent}");
+                Console.WriteLine($" для поиска по критериям нажмите {CommandSearchStudent}");
+                Console.WriteLine($" для выхода нажмите {CommandExit}");
+                Console.Write("ввод:");
+                userCommand = Console.ReadLine();
+                Console.WriteLine();
+
+                switch (userCommand)
+                {
+                    case CommandAddStudent:
+                        AddStudent();
+                        break;
+                    case CommandRemoveStudent:
+                        RemoveStudent();
+                        break;
+                    case CommandListStudent:
+                        ListStudents();
+                        break;
+                    case CommandSearchStudent:
+                        SearchStudents();
+                        break;
+                    case CommandExit:
+                        isStart = false;
+                        break;
+                    default:
+                        Console.WriteLine("сак кок трай агаин сак кок");
+                        break;
+                }
+
+                if (isStart)
+                {
+                    Console.WriteLine("продолжить:");
+                    Console.ReadKey();
+                }
+
+            }
+        }
+
+
+
+        private void AddStudent()
+        {
+            Console.Write("имя: ");
+            string firstName = Console.ReadLine();
+            Console.Write("фамилия: ");
+            string lastName = Console.ReadLine();
+            Console.Write("возраст: ");
+            int age = int.Parse(Console.ReadLine());
+            Console.Write("почта: ");
+            string email = Console.ReadLine();
+            Console.Write("номер телефона: ");
+            string phoneNumber = Console.ReadLine();
+
+            _students.Add(new Student(firstName, lastName, age, email, phoneNumber));
+
+            Console.WriteLine("студент успешно добавлен");
+        }
+
+        private void RemoveStudent()
+        {
+            int index = 0;
+            bool isInputId = false;
+            ListStudents();
+            Console.Write("ID для удаления студента: ");
+
+            while (isInputId == false)
+            {
+                if
+                    (int.TryParse(Console.ReadLine(), out index))
+                {
+                    if (index > 0 && index <= _students.Count)
+                    {
+                        _students.RemoveAt(index - 1);
+                        Console.WriteLine("Студент успешно удален");
+                        isInputId = true;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("неверный айди");
+                }
+            }
+        }
+
+        private void ListStudents()
+        {
+            if (_students.Count == 0)
+            {
+                Console.WriteLine("Список студентов пуст.");
+                return;
+            }
+
+            Console.WriteLine("Список студентов:");
+            for (int i = 0; i < _students.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}: Имя: {_students[i].FirstName}, Фамилия: {_students[i].LastName}, Возраст: {_students[i].Age}, Email: {_students[i].Email}, Телефон: {_students[i].PhoneNumber}");
+            }
+        }
+
+        private void SearchStudents()
+        {
+
+            List<Student> results = new List<Student>();
+            int age;
+            Console.WriteLine("найти кого");
+            string text = Console.ReadLine();
+            int.TryParse(text, out age);
+            text = text.ToLower();
+
+            if (_students.Count > 0)
+            {
+                foreach (Student student in _students)
+                    if (student.FirstName.ToLower() == text
+                        || student.LastName.ToLower() == text
+                        || student.Age == age
+                        || student.Email.ToLower() == text
+                        || student.PhoneNumber.ToLower() == text)
+                        Console.WriteLine($"{student.FirstName} {student.LastName} {student.Age} {student.Email} {student.PhoneNumber}");
+
+            }
+            else
+            {
+                Console.WriteLine("база пуста");
+            }
+
+        }
+    }
+}
